@@ -44,6 +44,8 @@ env
 # If this is omitted, the settings are looked up on the dataset dir.
 knet_dataset_id="$1" # In Docker (ie, CMD+ENTRYPOINT), this is aratiny by default
 
+echo $knet_dataset_id
+
 # The dataset directory, where config, data and possibly settings are taken for the dataset that the current
 # Knetminer instance is based on. The default is the dataset path in the Docker container, which can be mapped
 # to the user's location on the host via Docker volume mappings.
@@ -53,6 +55,8 @@ knet_dataset_dir=${2:-/root/knetminer-dataset}
 # Passing '' explicitly '' means don't run the server, just build everything (might be useful to run this script
 # in your environment, out of Docker).
 knet_tomcat_home=${3-$CATALINA_HOME}
+
+
 
 
 # --- Environment
@@ -78,21 +82,35 @@ do
 	mkdir --parents "$knet_dataset_dir/$dir"
 done
 
-cd "$mydir/../.."
-knet_codebase_dir="$(pwd)"
+
+
+
+#cd "$mydir/../.."
+
+#knet_codebase_dir="$(pwd)"
+
+knet_codebase_dir="/root/knetminer-build/knetminer"
+
+echo $knet_codebase_dir
+
+
 
 # --- In this case, copy the original settings from the codebase into the settings dir
-if [[ "$knet_dataset_id" != '' ]]; then
-	[[ "$knet_dataset_id" == 'aratiny' ]] \
-		&& org_settings="$knet_codebase_dir/common/aratiny/aratiny-docker" \
-		|| org_settings="$knet_codebase_dir/species/$knet_dataset_id"
+#if [[ "$knet_dataset_id" != '' ]]; then
+#	[[ "$knet_dataset_id" == 'aratiny' ]] \
+#		&& org_settings="$knet_codebase_dir/common/aratiny/aratiny-docker" \
+#		|| org_settings="$knet_codebase_dir/species/$knet_dataset_id"
 
-	if [ ! -d "$org_settings" ]; then
-		echo -e "\n\n\tFile $org_settings doesn't exist, check the dataset id '$knet_dataset_id' is correct\n"
-		exit 1
-	fi
-	cp -Rf "$org_settings"/* "$knet_dataset_dir/settings"
-fi
+#	if [ ! -d "$org_settings" ]; then
+#		echo -e "\n\n\tFile $org_settings doesn't exist, check the dataset id '$knet_dataset_id' is correct\n"
+#		exit 1
+#	fi
+#	cp -Rf "$org_settings"/* "$knet_dataset_dir/settings"
+#fi
+
+
+org_settings=$knet_codebase_dir/common/aratiny/aratiny-docker
+cp -Rf "$org_settings"/* "$knet_dataset_dir/settings"
 
 # Also we need a working copy of maven-settings.xml, cause this has to be changed by the commands below
 # TODO: document this
@@ -173,6 +191,7 @@ mvn $MAVEN_ARGS --settings "$knet_dataset_dir/config/actual-maven-settings.xml" 
 # Let's copy to Tomcat
 cp target/knetminer-aratiny.war "$knet_tomcat_home/webapps/client.war"
 
+
 # Periodic task used for analytics under AWS
 #
 if grep -q "docker" /proc/self/cgroup; then
@@ -202,3 +221,4 @@ cd "$knet_tomcat_home/bin"
 
 ./catalina.sh run
 echo -e "\n\n\tTomcat Server Stopped, container script has finished\n"
+
