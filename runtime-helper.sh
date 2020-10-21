@@ -5,11 +5,11 @@
 # This is used by the Knetminer container as ENTRYPOINT. It takes Knetminer client files from a fixed container
 # directory and uses them to run a dataset/specie specific container instance (all datasets leverage the same built
 # image). The configuration directory can dynamically be linked to an host location by mapping it as a Docker volume
-# (see https://github.com/Rothamsted/knetminer/wiki/8.-Docker).
+# (see https://github.com/Rothamsted/knetminer/wiki/8.-Docker).   
 # 
-# This script is also designed to prepare a fully-functional Knetminer environment in a Tomcat container and start
+# This script is also designed to prepare a fully-functional Knetminer environment in a Tomcat container and start 
 # Knetminer from any host, independently on Docker. In the latter case, you need to pre-install requirements manually
-# and to pass the correct parameters (see local-env-ex/ for details about this case). The best way to
+# and to pass the correct parameters (see local-env-ex/ for details about this case). The best way to 
 # prepare an environment to run this script is builder-helper.sh (which, similarly, can be used either to build a Docker
 # container or any other environment).
 #
@@ -21,8 +21,8 @@ mydir="$(pwd)"
 
 if [ "$1" == '--help' ]; then
 	cat <<EOT
-
-
+	
+	
 	Syntax: $(basename $0) [--deploy-only|--help] [dataset-id] [dataset-dir] [tomcat-home-dir]
 
 	Runs a Knetminer instance against a dataset, either from the Knetminer Docker container or from your own location.
@@ -46,19 +46,19 @@ knet_dataset_id="$1" # In Docker (ie, CMD+ENTRYPOINT), this is aratiny by defau
 
 # The dataset directory, where config, data and possibly settings are taken for the dataset that the current
 # Knetminer instance is based on. The default is the dataset path in the Docker container, which can be mapped
-# to the user's location on the host via Docker volume mappings.
+# to the user's location on the host via Docker volume mappings. 
 knet_dataset_dir=${2:-/root/knetminer-dataset}
 
 # Where the Tomcat server is installed.
 # Passing '' explicitly '' means don't run the server, just build everything (might be useful to run this script
 # in your environment, out of Docker).
-knet_tomcat_home=${3-$CATALINA_HOME}
+knet_tomcat_home=${3-$CATALINA_HOME} 
 
 
 # --- Environment
 #
 # Custom Maven arguments can be provided by the invoker (export MAVEN_ARGS='...') or the Docker image file
-# This is usually useful for custom Docker-independent builds, see local-env-ex/
+# This is usually useful for custom Docker-independent builds, see local-env-ex/ 
 export MAVEN_ARGS=${MAVEN_ARGS:-'-Pdocker'}
 
 # Default Java options to tell the JVM to use (almost) all the available memory
@@ -86,7 +86,7 @@ if [[ "$knet_dataset_id" != '' ]]; then
 	[[ "$knet_dataset_id" == 'aratiny' ]] \
 		&& org_settings="$knet_codebase_dir/common/aratiny/aratiny-docker" \
 		|| org_settings="$knet_codebase_dir/species/$knet_dataset_id"
-
+	
 	if [ ! -d "$org_settings" ]; then
 		echo -e "\n\n\tFile $org_settings doesn't exist, check the dataset id '$knet_dataset_id' is correct\n"
 		exit 1
@@ -98,7 +98,7 @@ fi
 # TODO: document this
 cp "$knet_dataset_dir/settings/maven-settings.xml" "$knet_dataset_dir/config/actual-maven-settings.xml"
 
-
+  
 # This is a parameter passed to index.jsp, it comes from attributes in basemap.xml
 chromosomes_list=$(xmllint --xpath '//genome/chromosome/@number' "$knet_dataset_dir/settings/client/basemap.xml" | sed -E s/'number="([^"]*)"'/'\1'/g)
 chromosomes_list=$(echo $chromosomes_list | sed s/'^ '// | sed s/' '/','/g)
@@ -119,11 +119,11 @@ cp -Rf common/aratiny/aratiny-ws /tmp
 # We don't need the test queries used for aratiny, let's remove them from the build location
 rm -Rf /tmp/aratiny-ws/src/test/resources/knetminer-dataset/config/neo4j/*.cypher
 
-# And then copy the dataset-specific config to the build place (in /tmp)
+# And then copy the dataset-specific config to the build place (in /tmp) 
 cp -Rf "$knet_dataset_dir/settings/ws/"* /tmp/aratiny-ws/src/test/resources/knetminer-dataset/config
 
-# Eventually, go to the build place and do mvn test-compile. This creates interpolated config files (ie,
-# all the placeholders are instantiated with the values in maven settings or in ancestor POMS).
+# Eventually, go to the build place and do mvn test-compile. This creates interpolated config files (ie, 
+# all the placeholders are instantiated with the values in maven settings or in ancestor POMS).  
 cd /tmp/aratiny-ws
 
 # Also, note that this command DOESN'T rebuild the server app, it just prepares some files into target/
@@ -134,10 +134,10 @@ cp -Rf target/test-classes/knetminer-dataset/config/* "$knet_dataset_dir/config"
 
 
 
-# ----- Build the client for this dataset.
+# ----- Build the client for this dataset. 
 #
 
-# We use the aratiny client as a blueprint, overriding it with dataset-specific files, taken from the configuration,
+# We use the aratiny client as a blueprint, overriding it with dataset-specific files, taken from the configuration, 
 # which is defined in $knet_instance_dir.
 #
 echo -e "\n\n\tBuilding the client app\n"
@@ -159,7 +159,7 @@ do
 	cp "$knet_dataset_dir/settings/client/"*.$ext "$client_html_dir/image" || :
 done
 
-# The Maven ${knetminer.releaseNotesHtml} placeholder can either be set by Maven settings, or replaced directly by a
+# The Maven ${knetminer.releaseNotesHtml} placeholder can either be set by Maven settings, or replaced directly by a 
 # file. The latter takes priority.
 # TODO: this approach replaces the placeholder in one file only. Should we replace it in maven settings too?
 #
@@ -174,16 +174,16 @@ mvn $MAVEN_ARGS --settings "$knet_dataset_dir/config/actual-maven-settings.xml" 
 cp target/knetminer-aratiny.war "$knet_tomcat_home/webapps/client.war"
 
 # Periodic task used for analytics under AWS
-#
+# 
 if grep -q "docker" /proc/self/cgroup; then
-	if [[ -f "$mydir/.aws/credentials" ]]; then
+	if [[ -f "$mydir/.aws/credentials" ]]; then 
 		echo -e "\n\n\tRunning crond in Docker container\n"
-		crontab $mydir/analytics-cron
+		crontab $mydir/analytics-cron 
 		crond
 		echo -e "\ncrond started\n"
 	else
 		echo -e "\nNo .aws/credentials found, skipping crond startup\n"
-	fi
+	fi 
 else
 	echo -e "\nSkipping crond (running outside Docker)"
 fi
@@ -198,7 +198,7 @@ if [ "$is_deploy_only" != '' ]; then
 fi
 
 echo -e "\n\n\tRunning the Tomcat server\n"
-cd "$knet_tomcat_home/bin"
+cd "$knet_tomcat_home/bin" 
 
 ./catalina.sh run
 echo -e "\n\n\tTomcat Server Stopped, container script has finished\n"
