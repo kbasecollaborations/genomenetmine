@@ -16,11 +16,11 @@ KBASE_ENDPOINT=https://appdev.kbase.us/services
 token=************
 
 </br>
-<code>docker-compose up</code>
+<code>docker-compose up --build</code>
 </br>
-In a separate terminal run
+In the browser go to
 </br>
-<code>docker-compose run web test </code>
+<code>http://localhost:5000/ws/aratiny/countHits?keyword=dormancy </code>
 </br>
 
 

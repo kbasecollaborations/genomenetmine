@@ -58,7 +58,6 @@ knet_tomcat_home=${3-$CATALINA_HOME}
 
 
 
-
 # --- Environment
 #
 # Custom Maven arguments can be provided by the invoker (export MAVEN_ARGS='...') or the Docker image file

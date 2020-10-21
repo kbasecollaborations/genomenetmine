@@ -1,5 +1,5 @@
 FROM knetminer/knetminer
-EXPOSE 8080
+EXPOSE 5000
 
 # See the documentation for details on what the dataset dir is
 ENV knet_build_dir=/root/knetminer-build
