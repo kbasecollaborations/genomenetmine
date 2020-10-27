@@ -19,7 +19,6 @@ RUN python /kb/module/scripts/download.py https://app.box.com/shared/static/wo9g
     && mv files/* . \
     && rm -rf files
 
-
 RUN mkdir -p /kb/module/work
 RUN chmod a+rwx /kb/module/work
 

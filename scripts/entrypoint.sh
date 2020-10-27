@@ -52,7 +52,8 @@ if [ $# -eq 0 ] ; then
   knet_tomcat_home=${3-$CATALINA_HOME}
   echo -e "\n\n\tRunning the Tomcat server\n"
   cd "$knet_tomcat_home/bin"
-  ./catalina.sh run
+  cp /kb/module/scripts/server_new.xml "$knet_tomcat_home/conf"
+  ./catalina.sh run -config conf/server_new.xml 
   echo -e "\n\n\tTomcat Server Stopped, container script has finished\n"
 
 # Run tests
