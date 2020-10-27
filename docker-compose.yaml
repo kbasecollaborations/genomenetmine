@@ -19,5 +19,3 @@ services:
       - WORKERS=1
     ports:
       - 5000:8080
-    volumes:
-      - ${PWD}:/kb/module

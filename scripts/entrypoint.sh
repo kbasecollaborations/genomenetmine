@@ -14,35 +14,31 @@
 # container or any other environment).
 #
 set -e
-cd "$(dirname $0)"
-mydir="$(pwd)"
-
-# --- Command line parameters
-
-if [ "$1" == '--help' ]; then
-	cat <<EOT
+#cd "$(dirname $0)"
 
 
-	Syntax: $(basename $0) [--deploy-only|--help] [dataset-id] [dataset-dir] [tomcat-home-dir]
+cp /root/knetminer-build/knetminer/compile_report.json /kb/module/work/compile_report.json
+cd /root/knetminer-dataset
+url="https://app.box.com/shared/static/obsdop264a4jxdqws2cqn9ubaxrqsgjl.zip"
+python /root/knetminer-build/knetminer/scripts/download.py $url genomefile.zip
+cd /root/knetminer-dataset/ && rm -rf data client-src config settings
+unzip genomefile.zip
+mv potato_data genomefile
+mv genomefile/* .
+rm -rf genomefile*
 
-	Runs a Knetminer instance against a dataset, either from the Knetminer Docker container or from your own location.
-	See my source and https://github.com/Rothamsted/knetminer/wiki/8.-Docker for details.
 
-EOT
-	exit 1
-elif [ "$1" == '--deploy-only' ]; then
-	is_deploy_only=true
-	shift
-fi
-
+cd /root/knetminer-build/knetminer
+mydir="/root/knetminer-build/knetminer"
+is_deploy_only=true
 set -x
-
 echo -e "\n\n\tInitial environment:"
 env
 
+
 # The dataset ID, ie, the settings directory to be found in the codebase, under species/
 # If this is omitted, the settings are looked up on the dataset dir.
-knet_dataset_id="$1" # In Docker (ie, CMD+ENTRYPOINT), this is aratiny by default
+knet_dataset_id=potato # In Docker (ie, CMD+ENTRYPOINT), this is aratiny by default
 
 echo $knet_dataset_id
 
@@ -54,6 +50,8 @@ knet_dataset_dir=${2:-/root/knetminer-dataset}
 # Where the Tomcat server is installed.
 # Passing '' explicitly '' means don't run the server, just build everything (might be useful to run this script
 # in your environment, out of Docker).
+
+# /usr/local/tomcat
 knet_tomcat_home=${3-$CATALINA_HOME}
 
 
@@ -62,6 +60,8 @@ knet_tomcat_home=${3-$CATALINA_HOME}
 #
 # Custom Maven arguments can be provided by the invoker (export MAVEN_ARGS='...') or the Docker image file
 # This is usually useful for custom Docker-independent builds, see local-env-ex/
+
+
 export MAVEN_ARGS=${MAVEN_ARGS:-'-Pdocker'}
 
 # Default Java options to tell the JVM to use (almost) all the available memory
@@ -74,22 +74,17 @@ export JAVA_TOOL_OPTIONS=${JAVA_TOOL_OPTIONS:-'-XX:MaxRAMPercentage=90.0 -XX:+Us
 #
 
 
-echo -e "\n\n\tUpdating the build environment\n"
+#echo -e "\n\n\tUpdating the build environment\n"
 
-for dir in settings config client-src # data/ is expected to be already there
-do
-	mkdir --parents "$knet_dataset_dir/$dir"
-done
-
-
+#for dir in settings config client-src # data/ is expected to be already there
+#do
+#	mkdir --parents "$knet_dataset_dir/$dir"
+#done
 
 
-#cd "$mydir/../.."
 
-#knet_codebase_dir="$(pwd)"
 
 knet_codebase_dir="/root/knetminer-build/knetminer"
-
 echo $knet_codebase_dir
 
 
@@ -108,46 +103,60 @@ echo $knet_codebase_dir
 #fi
 
 
-org_settings=$knet_codebase_dir/common/aratiny/aratiny-docker
-cp -Rf "$org_settings"/* "$knet_dataset_dir/settings"
+# org_setting is /root/knetminer-build/knetminer/common/aratiny/aratiny-docker/
+
+# we change org_settings to poplar
+#org_settings=$knet_codebase_dir/species/arabidopsis
+
+# copy /root/knetminer-dataset/settings
+#cp -Rf "$org_settings"/* "$knet_dataset_dir/settings"
+
+
+
 
 # Also we need a working copy of maven-settings.xml, cause this has to be changed by the commands below
 # TODO: document this
-cp "$knet_dataset_dir/settings/maven-settings.xml" "$knet_dataset_dir/config/actual-maven-settings.xml"
+
+# /root/knetminer-dataset/settings/maven-seetings.xnl  /root/knetminer-dataset/config/actual-maven-settings.xml
+#cp "$knet_dataset_dir/settings/maven-settings.xml" "$knet_dataset_dir/config/actual-maven-settings.xml"
 
 
+#  Where is basemap.xml
 # This is a parameter passed to index.jsp, it comes from attributes in basemap.xml
-chromosomes_list=$(xmllint --xpath '//genome/chromosome/@number' "$knet_dataset_dir/settings/client/basemap.xml" | sed -E s/'number="([^"]*)"'/'\1'/g)
-chromosomes_list=$(echo $chromosomes_list | sed s/'^ '// | sed s/' '/','/g)
+#chromosomes_list=$(xmllint --xpath '//genome/chromosome/@number' "$knet_dataset_dir/settings/client/basemap.xml" | sed -E s/'number="([^"]*)"'/'\1'/g)
+#chromosomes_list=$(echo $chromosomes_list | sed s/'^ '// | sed s/' '/','/g)
 
 # So, now instantiate the right Maven property, if the corresponding placeholder is defined
-sed s/'%%knetminer\.chromosomeList%%'/"$chromosomes_list"/ -i "$knet_dataset_dir/config/actual-maven-settings.xml"
+#sed s/'%%knetminer\.chromosomeList%%'/"$chromosomes_list"/ -i "$knet_dataset_dir/config/actual-maven-settings.xml"
 
 
 # --- Now let's create the right server config files and copy them on the config dir/volume
 #
-echo -e "\n\n\tBuilding the server-side config\n"
+#echo -e "\n\n\tBuilding the server-side config\n"
 
 # We need a copy where we can replace the knetminer test config with the one we need
 # We're in the knetminer codebase root now
-rm -Rf /tmp/aratiny-ws common/aratiny/aratiny-ws/target
-cp -Rf common/aratiny/aratiny-ws /tmp
+
+#rm -Rf /tmp/aratiny-ws common/aratiny/aratiny-ws/target
+
+#copy
+#cp -Rf common/aratiny/aratiny-ws /tmp
 
 # We don't need the test queries used for aratiny, let's remove them from the build location
-rm -Rf /tmp/aratiny-ws/src/test/resources/knetminer-dataset/config/neo4j/*.cypher
+#rm -Rf /tmp/aratiny-ws/src/test/resources/knetminer-dataset/config/neo4j/*.cypher
 
 # And then copy the dataset-specific config to the build place (in /tmp)
-cp -Rf "$knet_dataset_dir/settings/ws/"* /tmp/aratiny-ws/src/test/resources/knetminer-dataset/config
+#cp -Rf "$knet_dataset_dir/settings/ws/"* /tmp/aratiny-ws/src/test/resources/knetminer-dataset/config
 
 # Eventually, go to the build place and do mvn test-compile. This creates interpolated config files (ie,
 # all the placeholders are instantiated with the values in maven settings or in ancestor POMS).
-cd /tmp/aratiny-ws
+#cd /tmp/aratiny-ws
 
 # Also, note that this command DOESN'T rebuild the server app, it just prepares some files into target/
-mvn $MAVEN_ARGS --settings "$knet_dataset_dir/config/actual-maven-settings.xml" clean test-compile
+#mvn $MAVEN_ARGS --settings "$knet_dataset_dir/config/actual-maven-settings.xml" clean test-compile
 
 # And eventually, deploy the instantiated config files
-cp -Rf target/test-classes/knetminer-dataset/config/* "$knet_dataset_dir/config"
+#cp -Rf target/test-classes/knetminer-dataset/config/* "$knet_dataset_dir/config"
 
 
 
@@ -166,6 +175,8 @@ client_html_dir="$client_src_dir/src/main/webapp/html"
 # Common client files
 cd "$knet_codebase_dir"
 rm -Rf common/aratiny/aratiny-client/target
+
+# TODO: Think about how to replace this with poplar stuff
 cp -Rf common/aratiny/aratiny-client/* "$client_src_dir"
 
 # Additions and overridings from the dataset instance-specific dir
@@ -193,27 +204,30 @@ cp target/knetminer-aratiny.war "$knet_tomcat_home/webapps/client.war"
 
 # Periodic task used for analytics under AWS
 #
-if grep -q "docker" /proc/self/cgroup; then
-	if [[ -f "$mydir/.aws/credentials" ]]; then
-		echo -e "\n\n\tRunning crond in Docker container\n"
-		crontab $mydir/analytics-cron
-		crond
-		echo -e "\ncrond started\n"
-	else
-		echo -e "\nNo .aws/credentials found, skipping crond startup\n"
-	fi
-else
-	echo -e "\nSkipping crond (running outside Docker)"
-fi
+#if grep -q "docker" /proc/self/cgroup; then
+#	if [[ -f "$mydir/.aws/credentials" ]]; then
+#		echo -e "\n\n\tRunning crond in Docker container\n"
+#		crontab $mydir/analytics-cron
+#		crond
+#		echo -e "\ncrond started\n"
+#	else
+#		echo -e "\nNo .aws/credentials found, skipping crond startup\n"
+#	fi
+#else
+#	echo -e "\nSkipping crond (running outside Docker)"
+#fi
 
 
 # --- And eventually run the server, which will have the ws.war (from the Docker build), the new client .war and the server config.
 # 
 
-if [ "$is_deploy_only" != '' ]; then
-	echo -e "\n\n\tFiles deployed at '$knet_tomcat_home/webapps/', not running Tomcat because of --deploy-only\n"
-	exit
-fi
+
+#TODO: Figure when is it deploy only
+
+#if [ "$is_deploy_only" != '' ]; then
+#	echo -e "\n\n\tFiles deployed at '$knet_tomcat_home/webapps/', not running Tomcat because of --deploy-only\n"
+#	exit
+#fi
 
 echo -e "\n\n\tRunning the Tomcat server\n"
 cd "$knet_tomcat_home/bin"

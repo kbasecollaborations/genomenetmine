@@ -1,24 +1,10 @@
-FROM knetminer/knetminer
+FROM knetminer/knetminer:4.0.1
 EXPOSE 5000
-
-# See the documentation for details on what the dataset dir is
+RUN pip install requests
 ENV knet_build_dir=/root/knetminer-build
-
-
-# ---- Here we go
-#
-
-# If this is run in dev mode, we need 'docker build -f .' from the codebase root directory, since
-# climbing up the host paths is forbidden
-#
+RUN mkdir -p /kb/module/work
 WORKDIR $knet_build_dir
 COPY . knetminer
-#WORKDIR knetminer/common/quickstart
-
-
-ENTRYPOINT ["sh", "/root/knetminer-build/knetminer/entrypoint.sh"]
-#ENTRYPOINT ["sh"]
-
+ENTRYPOINT ["sh", "/root/knetminer-build/knetminer/scripts/entrypoint.sh"]
 #CMD ["aratiny"] # The id of the default dataset
-
 
