@@ -13,8 +13,16 @@ copy . /kb/module
 #    && tar xvzf webapps.tgz
 
 WORKDIR /root/knetminer-dataset
-RUN rm -rf data
-RUN python /kb/module/scripts/download.py https://app.box.com/shared/static/wo9gs9kysdye6znvcw2tsu739aml3iap.tgz files.tgz \
+#poplar
+#RUN rm -rf data \
+#    && python /kb/module/scripts/download.py https://app.box.com/shared/static/c5f8x3fbrxky1fc7h8gtnm6q4zblkiqj.tgz  files.tgz \
+#    && tar xvzf files.tgz \
+#    && mv files/poplar_data/* . \
+#    && rm -rf files
+
+#potato
+RUN rm -rf data \
+    && python /kb/module/scripts/download.py https://app.box.com/shared/static/wo9gs9kysdye6znvcw2tsu739aml3iap.tgz files.tgz \
     && tar xvzf files.tgz \
     && mv files/* . \
     && rm -rf files
