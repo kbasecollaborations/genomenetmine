@@ -13,7 +13,7 @@ copy . /kb/module
 #    && tar xvzf webapps.tgz
 
 RUN cd /opt \
-    && wget https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-distribution/9.4.33.v20201020/jetty-distribution-9.4.33.v20201020.zip \
+    && python /kb/module/scripts/download.py  https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-distribution/9.4.33.v20201020/jetty-distribution-9.4.33.v20201020.zip jetty-distribution-9.4.33.v20201020.zip \
     && unzip jetty-distribution-9.4.33.v20201020.zip \
     && mv jetty-distribution-9.4.33.v20201020 jetty 
 
