@@ -5,12 +5,7 @@ WORKDIR /root
 ENV knet_build_dir=/root/knetminer-build
 RUN mkdir -p /kb/module
 RUN chmod a+rw /kb/module
-copy . /kb/module
-
-#WORKDIR /opt/apache-tomcat-9.0.29/
-#RUN rm -rf webapps
-#RUN python /kb/module/scripts/download.py https://app.box.com/shared/static/c85l3wvzm68tg3d6qvmxaq4u5jaw4vuj.tgz webapps.tgz \
-#    && tar xvzf webapps.tgz
+COPY ./scripts/download.py /kb/module/scripts/download.py
 
 RUN cd /opt \
     && python /kb/module/scripts/download.py  https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-distribution/9.4.33.v20201020/jetty-distribution-9.4.33.v20201020.zip jetty-distribution-9.4.33.v20201020.zip \
@@ -32,8 +27,9 @@ RUN rm -rf data \
     && mv files/* . \
     && rm -rf files
 
-RUN mkdir -p /kb/module/work
-RUN chmod a+rwx /kb/module/work
+COPY . /kb/module
+RUN mkdir -p /kb/module/work && chmod a+rwx /kb/module/work
+
 
 ENTRYPOINT ["sh", "/kb/module/scripts/entrypoint.sh"]
 
