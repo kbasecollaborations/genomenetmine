@@ -12,6 +12,11 @@ copy . /kb/module
 #RUN python /kb/module/scripts/download.py https://app.box.com/shared/static/c85l3wvzm68tg3d6qvmxaq4u5jaw4vuj.tgz webapps.tgz \
 #    && tar xvzf webapps.tgz
 
+RUN cd /opt \
+    && wget https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-distribution/9.4.33.v20201020/jetty-distribution-9.4.33.v20201020.zip \
+    && unzip jetty-distribution-9.4.33.v20201020.zip \
+    && mv jetty-distribution-9.4.33.v20201020 jetty 
+
 WORKDIR /root/knetminer-dataset
 #poplar
 #RUN rm -rf data \

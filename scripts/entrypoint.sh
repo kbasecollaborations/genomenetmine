@@ -50,11 +50,18 @@ if [ $# -eq 0 ] ; then
 
   echo "Running in persistent server mode"
   knet_tomcat_home=${3-$CATALINA_HOME}
-  echo -e "\n\n\tRunning the Tomcat server\n"
+  echo -e "\n\n\tRunning the Jetty server\n"
   cd "$knet_tomcat_home/bin"
+  cp "/kb/module/scripts/start.ini" /opt/jetty
   cp /kb/module/scripts/server_new.xml "$knet_tomcat_home/conf"
-  ./catalina.sh run -config conf/server_new.xml 
-  echo -e "\n\n\tTomcat Server Stopped, container script has finished\n"
+  du -a /opt/tomcat/webapps >/kb/module/tomcat.txt
+  cp /opt/tomcat/webapps/*.war /opt/jetty/webapps/
+  du -a /opt/jetty/webapps >/kb/module/jetty.txt
+  cd /opt/jetty
+  java -jar start.jar
+#  ./catalina.sh run -config conf/server_new.xml 
+
+echo -e "\n\n\tJetty Server Stopped, container script has finished\n"
 
 # Run tests
 elif [ "${1}" = "test" ] ; then
