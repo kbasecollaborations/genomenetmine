@@ -5,12 +5,20 @@ WORKDIR /root
 ENV knet_build_dir=/root/knetminer-build
 RUN mkdir -p /kb/module
 RUN chmod a+rw /kb/module
+
+
 COPY ./scripts/download.py /kb/module/scripts/download.py
 
 RUN cd /opt \
     && python /kb/module/scripts/download.py  https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-distribution/9.4.33.v20201020/jetty-distribution-9.4.33.v20201020.zip jetty-distribution-9.4.33.v20201020.zip \
     && unzip jetty-distribution-9.4.33.v20201020.zip \
     && mv jetty-distribution-9.4.33.v20201020 jetty 
+
+ADD networkquery /kb/module/networkquery
+
+RUN cd /kb/module/networkquery \
+    && mvn package \
+    && cp target/networkquery.war /opt/jetty/webapps
 
 WORKDIR /root/knetminer-dataset
 #poplar
