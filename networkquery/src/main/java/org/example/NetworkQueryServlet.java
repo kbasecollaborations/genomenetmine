@@ -16,11 +16,12 @@ import java.net.URL;
 
 public class NetworkQueryServlet extends HttpServlet {
 
-    protected void doGet(HttpServletRequest request,
+
+   public  void doPost(HttpServletRequest request,
                          HttpServletResponse response) throws ServletException, IOException
     {
 
-            PrintWriter writer = response.getWriter();
+        PrintWriter writer = response.getWriter();
         try {
 
             String genelist = request.getParameter("genelist");
@@ -52,5 +53,5 @@ public class NetworkQueryServlet extends HttpServlet {
             writer.print("Exception in NetClientGet:- " + e);
         }
  
-   }
+}   
 }
