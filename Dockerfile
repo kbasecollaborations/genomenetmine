@@ -22,18 +22,26 @@ RUN cd /kb/module/networkquery \
 
 WORKDIR /root/knetminer-dataset
 #poplar
-#RUN rm -rf data \
-#    && python /kb/module/scripts/download.py https://app.box.com/shared/static/c5f8x3fbrxky1fc7h8gtnm6q4zblkiqj.tgz  files.tgz \
-#    && tar xvzf files.tgz \
-#    && mv files/poplar_data/* . \
-#    && rm -rf files
+RUN rm -rf data \
+    && python /kb/module/scripts/download.py https://app.box.com/shared/static/c5f8x3fbrxky1fc7h8gtnm6q4zblkiqj.tgz  files.tgz \
+    && tar xvzf files.tgz \
+    && mv files/poplar_data/* . \
+    && rm -rf files
 
 #potato
+#RUN rm -rf data \
+#    && python /kb/module/scripts/download.py https://app.box.com/shared/static/wo9gs9kysdye6znvcw2tsu739aml3iap.tgz files.tgz \
+#    && tar xvzf files.tgz \
+#    && mv files/* . \
+#    && rm -rf files
+
+#poplar
 RUN rm -rf data \
-    && python /kb/module/scripts/download.py https://app.box.com/shared/static/wo9gs9kysdye6znvcw2tsu739aml3iap.tgz files.tgz \
-    && tar xvzf files.tgz \
-    && mv files/* . \
-    && rm -rf files
+    && python /kb/module/scripts/download.py http://ec2-18-236-212-118.us-west-2.compute.amazonaws.com/knet2/files.tgz files.tgz\
+    && tar xvzf files.tgz 
+
+
+#http://ec2-18-236-212-118.us-west-2.compute.amazonaws.com/knet2/files.tgz
 
 COPY . /kb/module
 RUN mkdir -p /kb/module/work && chmod a+rwx /kb/module/work

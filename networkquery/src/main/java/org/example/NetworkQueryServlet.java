@@ -28,7 +28,7 @@ public class NetworkQueryServlet extends HttpServlet {
             String keywords = request.getParameter("keywords");
             String knet  = request.getParameter("knet");
 
-            String query_url = "http://localhost:5000/ws/" + knet + "/genome?" + "list=" + genelist + "&" + "keywords=" + keywords;
+            String query_url = "http://localhost:5000/ws/" + knet  + "list=" + genelist + "&" + "keywords=" + keywords;
             System.out.println(query_url);
 
             URL url = new URL(query_url);//your url i.e fetch data from .
